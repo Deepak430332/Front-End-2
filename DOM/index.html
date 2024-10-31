@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM</title>
+
+    <style>
+        #container>.child>span{
+
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="container">
+
+            <input type="number" name="rollnumber" id="rollnumber">
+            <div class="child">
+                <span>Span Message</span>
+                <b>Bold message</b>
+                <span class="text">Text2</span>
+                <b class="text">text3</b>
+                <!-- <p>india won</p> -->
+            </div>
+            <button class="btn">Click Me</button>
+    </div>
+
+    <button onclick="action()">Take action</button>
+    <script src="./script.js"></script>
+</body>
+</html>

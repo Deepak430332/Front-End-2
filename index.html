@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uber Price Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; font-family: Roboto, sans-serif; }
+        .loading { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Uber Trip Price Predictor</h1>
+        <form id="predictor-form" class="mb-4">
+            <div class="mb-3">
+                <label for="pickup" class="form-label">Pickup Location</label>
+                <input type="text" class="form-control" id="pickup" required>
+            </div>
+            <div class="mb-3">
+                <label for="dropoff" class="form-label">Dropoff Location</label>
+                <input type="text" class="form-control" id="dropoff" required>
+            </div>
+            <div class="mb-3">
+                <label for="passengers" class="form-label">Number of Passengers</label>
+                <input type="number" class="form-control" id="passengers" value="1" min="1" required>
+            </div>
+            <div class="mb-3">
+                <label for="vehicleType" class="form-label">Vehicle Type</label>
+                <select class="form-select" id="vehicleType">
+                    <option value="Economy">Economy</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Luxury">Luxury</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Calculate Price</button>
+        </form>
+        <div class="alert alert-danger d-none" id="error-message"></div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Trip Details</h5>
+                <div class="loading" id="loading-message">Calculating price...</div>
+                <p class="card-text" id="result"></p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('predictor-form');
+            const errorMessage = document.getElementById('error-message');
+            const loadingMessage = document.getElementById('loading-message');
+            const resultOutput = document.getElementById('result');
+
+            // Mock data for calculation
+            const mockData = {
+                baseRate: 5,
+                perMile: 2,
+                perPassenger: 1,
+                vehicleMultiplier: {
+                    Economy: 1,
+                    Premium: 1.5,
+                    Luxury: 2
+                }
+            };
+
+            // Retrieve last saved inputs
+            const savedInputs = JSON.parse(localStorage.getItem('lastInputs') || '{}');
+            if (savedInputs) {
+                document.getElementById('pickup').value = savedInputs.pickup || '';
+                document.getElementById('dropoff').value = savedInputs.dropoff || '';
+                document.getElementById('passengers').value = savedInputs.passengers || 1;
+                document.getElementById('vehicleType').value = savedInputs.vehicleType || 'Economy';
+            }
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                calculatePrice();
+            });
+
+            function calculatePrice() {
+                const pickup = document.getElementById('pickup').value;
+                const dropoff = document.getElementById('dropoff').value;
+                const passengers = parseInt(document.getElementById('passengers').value);
+                const vehicleType = document.getElementById('vehicleType').value;
+
+                // Save inputs
+                localStorage.setItem('lastInputs', JSON.stringify({ pickup, dropoff, passengers, vehicleType }));
+
+                if (!pickup || !dropoff || isNaN(passengers) || passengers <= 0) {
+                    showError('Please fill out all fields correctly.');
+                    return;
+                }
+
+                loadingMessage.classList.remove('d-none');
+                resultOutput.innerHTML = '';
+                errorMessage.classList.add('d-none');
+
+                // Simulated calculation delay
+                setTimeout(() => {
+                    try {
+                        const distance = Math.random() * 10 + 5; // Mock distance between 5 to 15 miles
+                        const basePrice = mockData.baseRate;
+                        const distancePrice = distance * mockData.perMile;
+                        const passengerPrice = passengers * mockData.perPassenger;
+                        const vehiclePrice = mockData.vehicleMultiplier[vehicleType];
+
+                        const totalPrice = ((basePrice + distancePrice + passengerPrice) * vehiclePrice).toFixed(2);
+
+                        resultOutput.innerHTML = `
+                            Pickup Location: ${pickup}<br>
+                            Dropoff Location: ${dropoff}<br>
+                            Number of Passengers: ${passengers}<br>
+                            Vehicle Type: ${vehicleType}<br>
+                            Estimated Price: $${totalPrice}
+                        `;
+                    } catch (e) {
+                        showError('An error occurred while calculating the price.');
+                    } finally {
+                        loadingMessage.classList.add('d-none');
+                    }
+                }, 1000);
+            }
+
+            function showError(message) {
+                errorMessage.classList.remove('d-none');
+                errorMessage.innerHTML = message;
+            }
+        });
+    </script>
+</body>
+</html>
